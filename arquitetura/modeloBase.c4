@@ -11,7 +11,7 @@ specification {
         shape person
       }
     }
-  
+    
     element database {
       style {
         shape storage
@@ -38,80 +38,75 @@ specification {
     customer = person "Usuário" {
       description "Cliente do sistema que pode ser um técnico, inventor ou administrador"
     }
+
+    gpas = externo "GPAS" {
+      description: "Sistema externo onde sao configurados os acessos/perfis dos usuários"
+    }
   
-    bigbank = enterprise "Ecosistema SIAPI" {
-  
-      supportStaff = externo "GPAS" {
-        description: "Sistema externo onde sao configurados os acessos/perfis dos usuários"
-      }
-  
-      backoffice = person "Back Office Staff" {
-        description: "Administration and support staff within the bank."
-      }
-  
-      mainframe = softwaresystem "Base de usuário Petrobras" {
-        description: "Armazena todos os usuários ativos da empresa usando a chave como base"
+    basePB = database "Base de usuários Petrobras" {
+      description: "Armazena todos os usuários da empresa usando a chave como base"
+    }
+
+    siapi = softwaresystem "Visão: Topologia do sistema" {
+      description: "Sistema de Transferencia 
+                    e 
+                    Propriedade Intelectual"
+      technology: "Asp.net - Rodando em Windows Server 2012."
         style {
-          shape: storage
-          color: red
+          shape rectangle
         }
-      }
-  
-      email = softwaresystem "E-mail System" {
-        description: "The internal Microsoft Exchange e-mail system."
-        style {
-          color: muted
-        }
-      }
-  
-      siapi = softwaresystem "SIAPI" {
-        description: "Sistema de Transferencia 
-                      e 
-                      Propriedade Intelectual"
-        technology: "Asp.net - Rodando em Windows Server 2012."
-          style {
-            shape rectangle
-          }
-          component singlePage 'Frontend' {
-            description 'Asp.net - Rodando em Windows Server 2012'
-            style {
-              shape browser
-            }
-          }
-          component backend 'Backend' {
-            description '
-              Implementa a parte de Business
-              expondo dados ao Frontend via Jquery
-            '
-          }
-          component bd 'Banco de Dados' {
-            description 'Oracle 19G'
-            style {
-              shape storage
-            }
-          }
-      }
-  
-      internetBankingSystem = softwaresystem "Internet Banking System" {
-        description: "Allows customers to view information about their bank accounts, and make payments."
-  
-        singlePageApplication = container "Single-Page Application" {
-          description: "Provides all of the Internet banking functionality to customers via their web browser."
-          technology: "JavaScript and Angular"
+        component singlePage 'Frontend' {
+          description 'Asp.net - Rodando em Windows Server 2012'
           style {
             shape browser
           }
         }
-        mobileApp = container "Mobile App" {
-          description: "Provides a limited subset of the Internet banking functionality to customers via their mobile device."
-          technology: "Xamarin"
+        component backend 'Backend' {
+          description '
+            Implementa a parte de Business
+            expondo dados ao Frontend via Jquery
+            '
+        }
+        component bd 'Banco de Dados' {
+          description 'Oracle 19G'
           style {
-            shape mobile
+            shape storage
           }
         }
-        webApplication = container "Web Application" {
-          description: "Delivers the static content and the Internet banking single page application."
-          technology: "Java and Spring MVC"
+        component siapiconsole "Siapi Console" {
+          description: "Sistema responsável pelos Agendamentos do sistema"
+          technology: "Windows Application"
+          style {
+            color: slate
+          }
+        }
+    }
+
+      sistemaexterno = softwaresystem "Sistemas Externos" {
+        description: "teste de container"
+        
+        lgpd = externo "LGPD" {
+          description: "Sistema externo que consome dados de uma view exclusiva"
+        }
+    
+        paineis = externo "PAINEIS" {
+          description: "Sistema externo que consome dados de uma view exclusiva"
+        }
+      }
+  
+      servicos = softwaresystem "Visão: Servicos oferecidos pelo sistema" {
+        description: "Ações disponíveis aos usuários"
+  
+        singlePageApplication = container "Single-Page Application" {
+          description: "Fornece toda a funcionalidade de Propriedade Intelectual aos clientes através de seu navegador da web."
+          technology: "Asp.Net"
+          style {
+            shape browser
+          }
+        }
+        webApplication = container "Aplicação Web" {
+          description: "Fornece o conteúdo estático e o aplicativo de página única do sistema"
+          technology: "DotNet 4.5"
         }
         apiApplication = container "API Application" {
           description: "Provides Internet banking functionality via a JSON/HTTPS API."
@@ -121,7 +116,7 @@ specification {
             description: "Allows users to sign in to the Internet Banking System."
             technology: "Spring MVC Rest Controller"
           }
-  
+        }
           accountsSummaryController = component "Accounts Summary Controller" {
             description: "Provides customers with a summary of their bank accounts."
             technology: "Spring MVC Rest Controller"
@@ -142,105 +137,95 @@ specification {
             description:  "Sends e-mails to users."
             technology: "Spring Bean"
           }
-  
-        }
         database = database "Database" {
           description: "Armazena dados do sistema, credenciais de autenticação com hash, logs de acesso, etc."
           technology: "Oracle 19G"
         }
       }
-    }
-  
+    
     // relationships between people and software systems
-    customer -> internetBankingSystem "Acessa o sistema via browser"
-    internetBankingSystem -> mainframe "Gets account information from, and makes payments using"
-    internetBankingSystem -> email "Sends e-mail using"
-    email -> customer "Sends e-mails to"
-    customer -> supportStaff "Solicita acesso via ServiceNow"
-    supportStaff -> mainframe "Consulta e valida"
+    customer -> servicos "Acessa o sistema via browser"
+    servicos -> basePB "Gets account information from, and makes payments using"
+    servicos -> siapiconsole "Eniva e-mail usando"
+    siapiconsole -> customer "Envia e-mails para"
+    siapiconsole -> backend  "Efetua requisição de 
+                              envio de e-mails para"
+    
+    gpas -> basePB "Consulta e valida"
     customer -> siapi "Acessa via browser"
-    siapi -> mainframe "Uses"
-    backoffice -> mainframe "Uses"
-  
+    siapi -> basePB "Uses"
+    gpas -> bd "Consome dados de 
+                view exclusiva"
+    lgpd -> bd "Consome dados de 
+                view exclusiva"
+    paineis -> bd "Consome dados de 
+                   view exclusiva"
+    
+
     // relationships to/from containers
-    customer -> webApplication "Visits bigbank.com using HTTPS"
-    customer -> singlePageApplication "Views account balances, and makes payments using"
-    customer -> mobileApp "Views account balances, and makes payments using"
-    webApplication -> singlePageApplication "Delivers to the customer's web browser"
-  
+    customer -> gpas "Acessa via ferramenta SAP"
+    customer -> webApplication "Acesse usando: stpi.cenpes.petrobras.com.br"
+    customer -> singlePageApplication "Utiliza serviços do sistema"
+    customer -> singlePage "Utiliza a estrutura"
+    webApplication -> singlePageApplication "Entrega aos usuário o Web Browser do sistema"
+    
+
     // relationships to/from components
     singlePageApplication -> signinController "Makes API calls to"
     singlePageApplication -> accountsSummaryController "Makes API calls to"
     singlePageApplication -> resetPasswordController "Makes API calls to"
-    mobileApp -> signinController "Makes API calls to"
-    mobileApp -> accountsSummaryController "Makes API calls to"
-    mobileApp -> resetPasswordController "Makes API calls to"
     signinController -> securityComponent "Uses"
     accountsSummaryController -> mainframeBankingSystemFacade "Uses"
     resetPasswordController -> securityComponent "Uses"
     resetPasswordController -> emailComponent "Uses"
     securityComponent -> database "Reads from and writes to"
-    mainframeBankingSystemFacade -> mainframe "Makes API calls to"
-    emailComponent -> email "Sends e-mail using"
-    singlePage -> backend "Efetua requisicao para"
-    backend -> bd "Solicita dados via query para"
-    backend -> singlePage "Disponibiliza dado para"
+    mainframeBankingSystemFacade -> basePB "Makes API calls to"
+    emailComponent -> siapiconsole "Sends e-mail using"
+    singlePage -> backend "Efetua 
+                           requisicao para"
+    backend -> bd "Solicita dados para"
+    backend -> singlePage "Disponibiliza 
+                           dados para"
     bd -> backend "Retorna dado solicitado para"
-  
+    
   }
-  
   views {
-  
-    view index of bigbank {
-      title "Big Bank - Landscape"
-      include *
-    }
-
     view siapi of siapi {
-      include *
-      style customer {
+      include 
+        customer ,
+        singlePage,
+        bd,
+        backend,
+        siapiconsole,
+        sistemaexterno,
+        siapi
+        style siapi {
         color muted
       }
-    }
-  
-    view context of bigbank {
-      title "Internet Banking System - SystemContext"
-      include
-        bigbank,
-        mainframe,
-        internetBankingSystem,
-        email,
-        customer
-  
-      style * {
-        color secondary
-      }
-      style bigbank, internetBankingSystem {
-        color primary
+      
+      style sistemaexterno {
+        color amber
       }
     }
-  
-    view ibsContainers of internetBankingSystem {
+    view ibsContainers of servicos {
       title "Internet Banking System - Containers"
   
       include
         *,
         -> customer
     }
-  
     view customer of customer {
       include
         *,
-        customer -> internetBankingSystem.*,
-        customer -> bigbank.*
-      exclude webApplication
+        customer -> servicos.*, siapi.*
+      exclude webApplication, siapiconsole, backend, bd
     }
   
     view spa of singlePageApplication {
       include
         *,
         apiApplication,
-        internetBankingSystem,
+        servicos,
         -> singlePageApplication ->
   
       style * {
@@ -251,15 +236,33 @@ specification {
         color primary
       }
     }
-  
-    view support of supportStaff {
+
+    view ext of sistemaexterno {
       include
         *,
-        bigbank,
-        -> backoffice ->
+        bd,
+        siapi,
+        -> singlePageApplication ->
+  
+      style * {
+        color muted
+      }
+  
+      style sistemaexterno, siapi {
+        color primary
+      }
+
+      style lgpd, paineis {
+        color green
+      }
     }
   
-    view apiApp of internetBankingSystem.apiApplication {
+    view support of gpas {
+      include
+        *
+    }
+  
+    view apiApp of servicos.apiApplication {
       title "API Application - Components"
   
       include *
@@ -268,7 +271,7 @@ specification {
         color muted
       }
   
-      style singlePageApplication, mobileApp {
+      style singlePageApplication {
         color secondary
       }
   
@@ -280,33 +283,7 @@ specification {
     view webapp of webApplication {
       include
         *,
-        internetBankingSystem,
-        bigbank
-  
-      style bigbank {
-        color muted
-      }
+        servicos
     }
-  
-    view mobileApp of mobileApp {
-      include
-        *,
-        internetBankingSystem,
-        internetBankingSystem.apiApplication,
-        mobileApp -> internetBankingSystem.apiApplication.*
-  
-      style * {
-        color muted
-      }
-  
-      style apiApplication.*, mobileApp {
-        color primary
-      }
-  
-      style customer {
-        color secondary
-      }
-    }
-
   }
   
