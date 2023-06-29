@@ -1,0 +1,62 @@
+specification {
+    element actor
+    element system
+    element component
+  }
+  
+  model {
+    customer = actor 'Usuário' {
+      description 'Usuário que acessa o sistema'
+      style {
+          shape person
+          color amber
+        }
+    }
+  
+    siapi = system 'Aplicação' {
+      component ui 'Frontend' {
+        description 'Asp.net - Rodando em Windows Server 2012'
+        style {
+          shape browser
+        }
+      }
+      component backend 'Backend' {
+        description '
+          Implementa a parte de Business
+          expondo dados ao Frontend via Jquery
+        '
+      }
+      component bd 'Banco de Dados' {
+        description 'Oracle 19G'
+        style {
+          shape storage
+        }
+      }
+  
+      // UI requests data from the Backend
+      ui -> backend 'Efetua requisicao para'
+      backend -> bd 'Solicita dados via query para'
+      backend -> ui 'Disponibiliza dado para'
+      bd -> backend 'Retorna dado solicitado para'
+    }
+  
+    // Customer uses the UI
+    customer -> ui 'Abre aplicacao via Browser'
+  }
+  
+  views {
+  
+    view index {
+      title 'Visão Geral Arquitetura'
+      include *
+    }
+  
+    view siapi of siapi {
+      include *
+      style customer {
+        color muted
+      }
+    }
+  
+  }
+  
