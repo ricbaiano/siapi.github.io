@@ -1,9 +1,13 @@
+// PROJETO SIAPI - SISTEMA DE TRANFERENCIA E PROPRIEDADE INTELECTUAL
+// VERSAO: 1.0
+// CRIADO POR: RICHARD BARBOSA - E0O9
+
 specification {
 
-    element enterprise
     element softwaresystem
     element container
     element component
+    element modulo
   
     element person {
       style {
@@ -30,21 +34,58 @@ specification {
           shape browser
           color primary
         }
-      }    
+      }
+      element servidor {
+        style {
+          shape rectangle
+          color primary
+        }
+      }  
+      element funcionalidade {
+        style {
+          shape rectangle
+          color muted
+        }
+      }  
   }
   
   model {
   
     customer = person "Usuário" {
-      description "Cliente do sistema que pode ser um técnico, inventor ou administrador"
+      description "Cliente do sistema"
     }
 
-    gpas = externo "GPAS" {
-      description: "Sistema externo onde sao configurados os acessos/perfis dos usuários"
-    }
-  
-    basePB = database "Base de usuários Petrobras" {
-      description: "Armazena todos os usuários da empresa usando a chave como base"
+    controleacesso = softwaresystem "Visão: Controle de acesso" {
+      description: "Solicitação/Liberação 
+                    de 
+                    acesso ao sistema"
+        style {
+          shape rectangle
+        }
+        
+        component gpas "GPAS" {
+          description: "Sistema externo onde sao configurados os acessos/perfis dos usuários"
+          style {
+            shape queue
+            color green
+          }
+        }
+
+        component ca "CA" {
+          description: "Sistema externo onde sao configurados os acessos/perfis dos usuários"
+          style {
+            shape queue
+            color green
+          }
+        }
+   
+        component basePB "Base de usuários Petrobras" {
+          description: "Armazena todos os usuários da empresa usando a chave como base"
+          style {
+            shape storage
+            color red
+          }
+        }
     }
 
     siapi = softwaresystem "Visão: Topologia do sistema" {
@@ -55,35 +96,131 @@ specification {
         style {
           shape rectangle
         }
-        component singlePage 'Frontend' {
-          description 'Asp.net - Rodando em Windows Server 2012'
+
+        component servidor "Servidor de Aplicação"{
+          description: "Maquina virtual rodando 
+                        servidor de aplicação"
+          technology: "Windows Server 2012"
+        }
+
+        component frontend "Frontend" {
+          description "Interface principal do sistema"
+          technology: "Asp.Net"
           style {
             shape browser
           }
         }
-        component backend 'Backend' {
-          description '
+
+        component backend "Backend" {
+          description "
             Implementa a parte de Business
-            expondo dados ao Frontend via Jquery
-            '
+            expondo dados ao Frontend 
+            via Jquery"
         }
-        component bd 'Banco de Dados' {
-          description 'Oracle 19G'
+
+        component bd "Banco de Dados" {
+          description "Oracle 19G"
           style {
             shape storage
           }
         }
-        component siapiconsole "Siapi Console" {
-          description: "Sistema responsável pelos Agendamentos do sistema"
-          technology: "Windows Application"
-          style {
-            color: slate
-          }
-        }
     }
 
+    webApplication = softwaresystem "Aplicação Web" {
+      description: "Fornece o conteúdo estático e o aplicativo de página única do sistema"
+      technology: "DotNet 4.5"
+    
+      frontendUser = modulo "Frontend" {
+        description "Interface principal do sistema"
+        technology: "Asp.Net"
+        style {
+          shape browser
+        }
+      }
+
+      modulossistema = softwaresystem "Módulos do SIAPI" {
+        description: "Fornece toda a funcionalidade de Propriedade Intelectual aos clientes através de seu navegador da web."
+        technology: "Asp.Net"
+        style {
+          shape browser
+        }
+
+        buscarelatorio = modulo "Módulo: Busca e Relatórios" {
+          description: "Provides Internet banking functionality via a JSON/HTTPS API."
+          technology: "Java and Spring MVC"
+        }
+
+        oposicao = container "Módulo: Oposição" {
+          description: "Provides customers with a summary of their bank accounts."
+          technology: "Spring MVC Rest Controller"
+        }
+
+        protecao = container "Módulo: Protecao" {
+          description: "Allows users to reset their passwords with a single use URL."
+          technology: "Spring MVC Rest Controller"
+        }
+
+        monitoramento = container "Módulo: Monitoramento" {
+          description: "Provides functionality related to signing in, changing passwords, etc."
+          technology: "Spring Bean"
+        }
+
+        tranferenciatecnologia = container "Módulo: Tranferencia de Tecnologia" {
+          description: "A facade onto the mainframe banking system."
+          technology: "Spring Bean"
+        }
+      }
+  
+      servicos = container "Visão: Serviços disponíveis no SIAPI" {
+        description: "Ações disponíveis aos usuários"
+
+          relatorio = funcionalidade "Relatórios" {
+            description: "Relatórios para usuário"
+          }
+
+          buscaavancada = funcionalidade "Busca Avançada por Proteção" {
+            description: "Relatórios para usuário"
+          }
+
+          criacaoposicao = funcionalidade "Criação de Oposição" {
+            description: "Relatórios para usuário"
+          }
+
+          tratamentooposicao = funcionalidade "Tratamento e Acompanhamento de Oposição" {
+            description: "Relatórios para usuário"
+          }
+
+          ni = funcionalidade "Notificação de Invençãp" {
+            description: "Relatórios para usuário"
+          }
+
+          rpc = funcionalidade "Registro de Programa de Computador" {
+            description: "Relatórios para usuário"
+          }
+
+          rdi = funcionalidade "Registro de Desenho Industrial" {
+            description: "Relatórios para usuário"
+          }
+
+          criacaomonitoramento = funcionalidade "Criação/Acompanhamento de Monitoramento" {
+            description: "Relatórios para usuário"
+          }
+
+          tratamentomonitoramento = funcionalidade "Tratamento de Monitoramento" {
+            description: "Relatórios para usuário"
+          }
+
+          criacaotransftec = funcionalidade "Criação/Acompanhamento de Tranferencia de Tecnologia" {
+            description: "Relatórios para usuário"
+          }
+
+          tratamentotransftec = funcionalidade "Tratamento de Tranferencia de Tecnologia" {
+            description: "Relatórios para usuário"
+          }
+      }
+  }
       sistemaexterno = softwaresystem "Sistemas Externos" {
-        description: "teste de container"
+        description: "Consomem dados da base do sistema"
         
         lgpd = externo "LGPD" {
           description: "Sistema externo que consome dados de uma view exclusiva"
@@ -93,156 +230,232 @@ specification {
           description: "Sistema externo que consome dados de uma view exclusiva"
         }
       }
-  
-      servicos = softwaresystem "Visão: Servicos oferecidos pelo sistema" {
-        description: "Ações disponíveis aos usuários"
-  
-        singlePageApplication = container "Single-Page Application" {
-          description: "Fornece toda a funcionalidade de Propriedade Intelectual aos clientes através de seu navegador da web."
-          technology: "Asp.Net"
+
+      siapiconsole = softwaresystem "Siapi Console"{
+        
+        component siapiconsole "Siapi Console" {
+          description: "Sistema responsável pelos 
+                        Agendamentos do sistema"
+          technology: "Windows Application"
           style {
-            shape browser
+            color: slate
           }
-        }
-        webApplication = container "Aplicação Web" {
-          description: "Fornece o conteúdo estático e o aplicativo de página única do sistema"
-          technology: "DotNet 4.5"
-        }
-        apiApplication = container "API Application" {
-          description: "Provides Internet banking functionality via a JSON/HTTPS API."
-          technology: "Java and Spring MVC"
-  
-          signinController = component "Sign In Controller" {
-            description: "Allows users to sign in to the Internet Banking System."
-            technology: "Spring MVC Rest Controller"
-          }
-        }
-          accountsSummaryController = component "Accounts Summary Controller" {
-            description: "Provides customers with a summary of their bank accounts."
-            technology: "Spring MVC Rest Controller"
-          }
-          resetPasswordController = component "Reset Password Controller" {
-            description: "Allows users to reset their passwords with a single use URL."
-            technology: "Spring MVC Rest Controller"
-          }
-          securityComponent = component "Security Component" {
-            description: "Provides functionality related to signing in, changing passwords, etc."
-            technology: "Spring Bean"
-          }
-          mainframeBankingSystemFacade = component "Mainframe Banking System Facade" {
-            description: "A facade onto the mainframe banking system."
-            technology: "Spring Bean"
-          }
-          emailComponent = component "E-mail Component"{
-            description:  "Sends e-mails to users."
-            technology: "Spring Bean"
-          }
-        database = database "Database" {
-          description: "Armazena dados do sistema, credenciais de autenticação com hash, logs de acesso, etc."
-          technology: "Oracle 19G"
+            backendConsole = externo "Backend" {
+              description: "Recebe as requisições de agendamentos realizadas pelo SIAPI Console"
+            }
+        
+            bdConsole = externo "Banco de dados" {
+              description: "Armazena os registros relativos aos agendamentos"
+            }
         }
       }
     
     // relationships between people and software systems
-    customer -> servicos "Acessa o sistema via browser"
-    servicos -> basePB "Gets account information from, and makes payments using"
-    servicos -> siapiconsole "Eniva e-mail usando"
-    siapiconsole -> customer "Envia e-mails para"
-    siapiconsole -> backend  "Efetua requisição de 
-                              envio de e-mails para"
-    
-    gpas -> basePB "Consulta e valida"
-    customer -> siapi "Acessa via browser"
-    siapi -> basePB "Uses"
-    gpas -> bd "Consome dados de 
-                view exclusiva"
-    lgpd -> bd "Consome dados de 
-                view exclusiva"
-    paineis -> bd "Consome dados de 
-                   view exclusiva"
-    
+    customer -> modulossistema "Acessa o sistema 
+                                para executar ações 
+                                nos módulos dispníveis"
+    servicos -> siapiconsole "Envia e-mail usando"
+    lgpd -> bd "Acessam através 
+                de view no"
+    paineis -> bd "Acessam através 
+                   de view no"
+    customer -> siapi "Acessa via 
+                       browser"
 
-    // relationships to/from containers
-    customer -> gpas "Acessa via ferramenta SAP"
-    customer -> webApplication "Acesse usando: stpi.cenpes.petrobras.com.br"
-    customer -> singlePageApplication "Utiliza serviços do sistema"
-    customer -> singlePage "Utiliza a estrutura"
-    webApplication -> singlePageApplication "Entrega aos usuário o Web Browser do sistema"
+    // Relacionamentos do controle de acesso GPAS e CA
+    customer -> gpas "Solicita acesso 
+                      ao sistema"
+    gpas -> basePB "Verifica se 
+                    existe na "
+    basePB -> gpas "Alimenta os 
+                    cadastros 
+                    dos perfis"                
+    gpas -> ca "Faz alguma 
+                coisa"
+    ca -> customer "Concede acesso 
+                      ao sistema"
     
+    // Relacionamentos do SIAPI CONSOLE
+    siapiconsole -> customer "Envia e-mails 
+                              para"
+    backendConsole -> bdConsole  "Solicita/Opera 
+                                  operações de 
+                                  agendamento para"
+    bdConsole -> backendConsole "Devolve o dado
+                                 requisitado"
 
-    // relationships to/from components
-    singlePageApplication -> signinController "Makes API calls to"
-    singlePageApplication -> accountsSummaryController "Makes API calls to"
-    singlePageApplication -> resetPasswordController "Makes API calls to"
-    signinController -> securityComponent "Uses"
-    accountsSummaryController -> mainframeBankingSystemFacade "Uses"
-    resetPasswordController -> securityComponent "Uses"
-    resetPasswordController -> emailComponent "Uses"
-    securityComponent -> database "Reads from and writes to"
-    mainframeBankingSystemFacade -> basePB "Makes API calls to"
-    emailComponent -> siapiconsole "Sends e-mail using"
-    singlePage -> backend "Efetua 
-                           requisicao para"
-    backend -> bd "Solicita dados para"
-    backend -> singlePage "Disponibiliza 
+    // Relacionamentos do Módulo e Serviços do SIAPI
+    customer -> frontendUser "Acessa via browser usando: 
+                                stpi.cenpes.petrobras.com.br" 
+    modulossistema -> servicos "Acessa serviços 
+                                específicos"
+    customer -> modulossistema "Utiliza serviços 
+                                do sistema"
+    customer -> servidor "Para utilizar 
+                          a estrutura usa"
+    customer -> controleacesso
+  
+    // Relacionamento Arquitetura do Sistema
+    servidor -> frontend  "Hospeda e fornece 
+                            acesso pela URL: 
+                            stpi.cenpes.petrobras.com.br"
+    frontend -> backend "Efetua 
+                           requisicao 
+                           para"
+    backend -> bd "Solicita dados 
+                   para"
+    backend -> frontend "Disponibiliza 
                            dados para"
-    bd -> backend "Retorna dado solicitado para"
-    
+    bd -> backend "Retorna dado 
+                   solicitado para"
+
+    // Relacionamento Modulos e Funcionalidades
+    frontendUser -> protecao "Acessa o 
+                          módulo de"
+    frontendUser -> oposicao "Acessa o 
+                          módulo de"
+    frontendUser -> buscarelatorio "Acessa o 
+                                módulo de"
+    frontendUser -> tranferenciatecnologia "Acessa o 
+                                        módulo de"
+    frontendUser -> monitoramento "Acessa o 
+                               módulo de"
+    protecao -> ni "Consome serviços de"
+    protecao -> rdi "Consome serviços de"
+    protecao -> rpc "Consome serviços de"
+    buscarelatorio -> buscaavancada "Consome serviços de"
+    buscarelatorio -> relatorio "Consome serviços de"
+    monitoramento -> criacaomonitoramento "Consome serviços de"
+    monitoramento -> tratamentomonitoramento "Consome serviços de"
+    oposicao -> criacaoposicao "Consome serviços de"
+    oposicao -> tratamentooposicao "Consome serviços de"
+    tranferenciatecnologia -> criacaotransftec "Consome serviços de"
+    tranferenciatecnologia -> tratamentotransftec "Consome serviços de"
+
+
+
   }
   views {
-    view siapi of siapi {
-      include 
-        customer ,
-        singlePage,
-        bd,
-        backend,
-        siapiconsole,
-        sistemaexterno,
-        siapi
-        style siapi {
-        color muted
-      }
-      
-      style sistemaexterno {
-        color amber
-      }
-    }
-    view ibsContainers of servicos {
-      title "Internet Banking System - Containers"
-  
-      include
-        *,
-        -> customer
-    }
+
     view customer of customer {
       include
         *,
-        customer -> servicos.*, siapi.*
-      exclude webApplication, siapiconsole, backend, bd
+        customer -> siapi.*, controleacesso.*, webApplication.frontendUser
+      exclude  
+        siapiconsole, 
+        basePB,
+        ca,
+        servicos
+
+        style siapi, controleacesso, webApplication {
+          color muted
+        }
+
+        style gpas {
+          color primary
+        }
     }
-  
-    view spa of singlePageApplication {
-      include
-        *,
-        apiApplication,
-        servicos,
-        -> singlePageApplication ->
-  
-      style * {
+
+    view  siapi of siapi {
+      include 
+        customer ,
+        servidor,
+        frontend,
+        backend,
+        bd,
+        siapi,
+        sistemaexterno,
+        siapiconsole
+
+        style siapi {
         color muted
       }
-  
-      style singlePageApplication, customer {
+
+      style bd {
+        color red
+      }
+
+      style sistemaexterno,siapiconsole {
+        color green
+        shape queue
+      }
+    }
+
+    view controleacesso of controleacesso {
+      include
+        customer,
+        gpas,
+        ca,
+        basePB,
+        controleacesso
+
+      style controleacesso{
+        color muted
+      }
+    }
+
+    view siapiconsole of siapiconsole{
+      include backendConsole, siapiconsole, bdConsole, siapi
+      
+      style siapi {
+        color muted
+      }
+      
+      style siapiconsole {
         color primary
       }
+
+      style bdConsole {
+        color red
+      }
+    }
+  
+    view  modulos of webApplication {
+      include
+        *,
+        customer,
+        servicos,
+        buscarelatorio,
+        protecao,
+        oposicao,
+        tranferenciatecnologia,
+        monitoramento
+
+      style webApplication {
+        color muted
+        shape browser
+      }
+  
+      style customer {
+        color amber
+      }
+
+      exclude siapiconsole
+    }
+
+    view funcionalidade of servicos {
+      include
+        *,
+        frontendUser,
+        customer,
+        servicos,
+        customer,
+        servicos,
+        buscarelatorio,
+        protecao,
+        oposicao,
+        tranferenciatecnologia,
+        monitoramento
+
+      exclude siapiconsole
     }
 
     view ext of sistemaexterno {
       include
         *,
+        customer,
         bd,
-        siapi,
-        -> singlePageApplication ->
+        siapi
   
       style * {
         color muted
@@ -255,35 +468,23 @@ specification {
       style lgpd, paineis {
         color green
       }
-    }
-  
-    view support of gpas {
-      include
-        *
-    }
-  
-    view apiApp of servicos.apiApplication {
-      title "API Application - Components"
-  
-      include *
-  
-      style * {
-        color muted
-      }
-  
-      style singlePageApplication {
-        color secondary
-      }
-  
-      style apiApplication, apiApplication.* {
-        color primary
+
+      style bd {
+        color red
       }
     }
-  
+
     view webapp of webApplication {
       include
-        *,
-        servicos
+        *
+      style webApplication {
+        color muted
+      }
+      
+      exclude
+        siapiconsole,
+        controleacesso  
     }
+    
   }
   
