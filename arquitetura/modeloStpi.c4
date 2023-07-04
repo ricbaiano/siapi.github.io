@@ -51,7 +51,7 @@ specification {
   
   model {
   
-    customer = person "Usuário" {
+    usuario = person "Usuário" {
       description "Cliente do sistema"
     }
 
@@ -64,7 +64,7 @@ specification {
         }
         
         component gpas "GPAS" {
-          description: "Sistema externo onde sao configurados os acessos/perfis dos usuários"
+          description: "Sistema externo onde sao configurados os acessos e perfis dos usuários"
           style {
             shape queue
             color green
@@ -72,7 +72,7 @@ specification {
         }
 
         component ca "CA" {
-          description: "Sistema externo onde sao configurados os acessos/perfis dos usuários"
+          description: "Sistema externo onde sao configurados os acessos e perfis dos usuários"
           style {
             shape queue
             color green
@@ -116,6 +116,7 @@ specification {
             Implementa a parte de Business
             expondo dados ao Frontend 
             via Jquery"
+          technology "VB.Net"
         }
 
         component bd "Banco de Dados" {
@@ -126,7 +127,7 @@ specification {
         }
     }
 
-    webApplication = softwaresystem "Aplicação Web" {
+    aplicacaoWeb = softwaresystem "Visão: Módulos e Serviços do sistema" {
       description: "Fornece o conteúdo estático e o aplicativo de página única do sistema"
       technology: "DotNet 4.5"
     
@@ -146,27 +147,27 @@ specification {
         }
 
         buscarelatorio = modulo "Módulo: Busca e Relatórios" {
-          description: "Provides Internet banking functionality via a JSON/HTTPS API."
+          description: ""
           technology: "Java and Spring MVC"
         }
 
         oposicao = container "Módulo: Oposição" {
-          description: "Provides customers with a summary of their bank accounts."
+          description: ""
           technology: "Spring MVC Rest Controller"
         }
 
-        protecao = container "Módulo: Protecao" {
-          description: "Allows users to reset their passwords with a single use URL."
+        protecao = container "Módulo: Proteção" {
+          description: ""
           technology: "Spring MVC Rest Controller"
         }
 
         monitoramento = container "Módulo: Monitoramento" {
-          description: "Provides functionality related to signing in, changing passwords, etc."
+          description: ""
           technology: "Spring Bean"
         }
 
         tranferenciatecnologia = container "Módulo: Tranferencia de Tecnologia" {
-          description: "A facade onto the mainframe banking system."
+          description: ""
           technology: "Spring Bean"
         }
       }
@@ -251,32 +252,43 @@ specification {
       }
     
     // relationships between people and software systems
-    customer -> modulossistema "Acessa o sistema 
+    usuario -> modulossistema "Acessa o sistema 
                                 para executar ações 
-                                nos módulos dispníveis"
+                                nos módulos disponíveis"
     servicos -> siapiconsole "Envia e-mail usando"
-    lgpd -> bd "Acessam através 
-                de view no"
-    paineis -> bd "Acessam através 
-                   de view no"
-    customer -> siapi "Acessa via 
+    usuario -> siapi "Acessa via 
                        browser"
+    
+    // Relacionamentos dos Sistemas externos
+    sistemaexterno -> bd "Solicita dados
+                          para"
+    lgpd -> bd "Efetua requisicao 
+                por VIEW exclusiva 
+                no"
+    bd -> lgpd "Retorna dado 
+                solicitado para"
+    paineis -> bd "Efetua requisicao 
+                   por VIEW exclusiva
+                   no"
+    bd -> paineis "Retorna dado 
+                   solicitado para"
+    
 
     // Relacionamentos do controle de acesso GPAS e CA
-    customer -> gpas "Solicita acesso 
-                      ao sistema"
-    gpas -> basePB "Verifica se 
-                    existe na "
+    usuario -> gpas "Solicita acesso 
+                      ao sistema ao"
+    gpas -> basePB "Valida se chave 
+                    existe na"
     basePB -> gpas "Alimenta os 
                     cadastros 
                     dos perfis"                
-    gpas -> ca "Faz alguma 
-                coisa"
-    ca -> customer "Concede acesso 
-                      ao sistema"
+    gpas -> ca "Autoriza o cadastro 
+                do acesso"
+    ca -> usuario "Autentica e autoriza 
+                    acesso ao sistema"
     
     // Relacionamentos do SIAPI CONSOLE
-    siapiconsole -> customer "Envia e-mails 
+    siapiconsole -> usuario "Envia e-mails 
                               para"
     backendConsole -> bdConsole  "Solicita/Opera 
                                   operações de 
@@ -285,69 +297,90 @@ specification {
                                  requisitado"
 
     // Relacionamentos do Módulo e Serviços do SIAPI
-    customer -> frontendUser "Acessa via browser usando: 
-                                stpi.cenpes.petrobras.com.br" 
+    usuario -> frontendUser "Acessa via 
+                              browser usando: 
+                              stpi.cenpes.petrobras.com.br" 
     modulossistema -> servicos "Acessa serviços 
                                 específicos"
-    customer -> modulossistema "Utiliza serviços 
-                                do sistema"
-    customer -> servidor "Para utilizar 
-                          a estrutura usa"
-    customer -> controleacesso
+    usuario -> modulossistema "Utiliza serviços 
+                               do sistema"
+    usuario -> servidor "Utiliza a 
+                         estrutura"
+    usuario -> controleacesso ""
   
     // Relacionamento Arquitetura do Sistema
     servidor -> frontend  "Hospeda e fornece 
                             acesso pela URL: 
                             stpi.cenpes.petrobras.com.br"
-    frontend -> backend "Efetua 
-                           requisicao 
-                           para"
-    backend -> bd "Solicita dados 
-                   para"
+    frontend -> backend "Efetua requisicao 
+                         Webform / ajax
+                         para"
+    backend -> bd "Efetua requisicao 
+                   VB.Net para"
     backend -> frontend "Disponibiliza 
                            dados para"
     bd -> backend "Retorna dado 
                    solicitado para"
 
     // Relacionamento Modulos e Funcionalidades
-    frontendUser -> protecao "Acessa o 
+    frontendUser -> protecao "Utiliza o 
                           módulo de"
-    frontendUser -> oposicao "Acessa o 
+    frontendUser -> oposicao "Utiliza o 
                           módulo de"
-    frontendUser -> buscarelatorio "Acessa o 
+    frontendUser -> buscarelatorio "Utiliza o 
                                 módulo de"
-    frontendUser -> tranferenciatecnologia "Acessa o 
+    frontendUser -> tranferenciatecnologia "Utiliza o 
                                         módulo de"
-    frontendUser -> monitoramento "Acessa o 
+    frontendUser -> monitoramento "Utiliza o 
                                módulo de"
-    protecao -> ni "Consome serviços de"
-    protecao -> rdi "Consome serviços de"
-    protecao -> rpc "Consome serviços de"
-    buscarelatorio -> buscaavancada "Consome serviços de"
-    buscarelatorio -> relatorio "Consome serviços de"
-    monitoramento -> criacaomonitoramento "Consome serviços de"
-    monitoramento -> tratamentomonitoramento "Consome serviços de"
-    oposicao -> criacaoposicao "Consome serviços de"
-    oposicao -> tratamentooposicao "Consome serviços de"
-    tranferenciatecnologia -> criacaotransftec "Consome serviços de"
-    tranferenciatecnologia -> tratamentotransftec "Consome serviços de"
-
-
+    protecao -> ni "Executa 
+                    atividades
+                    de"
+    protecao -> rdi "Executa 
+                     atividades 
+                     de"
+    protecao -> rpc "Executa 
+                     atividades 
+                     de"
+    buscarelatorio -> buscaavancada "Executa 
+                                     atividades 
+                                     de"
+    buscarelatorio -> relatorio "Executa 
+                                 atividades 
+                                 de"
+    monitoramento -> criacaomonitoramento "Executa 
+                                           atividades 
+                                           de"
+    monitoramento -> tratamentomonitoramento "Executa 
+                                              atividades 
+                                              de"
+    oposicao -> criacaoposicao "Executa 
+                                atividades 
+                                de"
+    oposicao -> tratamentooposicao "Executa 
+                                    atividades 
+                                    de"
+    tranferenciatecnologia -> criacaotransftec "Executa 
+                                                atividades 
+                                                de"
+    tranferenciatecnologia -> tratamentotransftec "Executa 
+                                                   atividades 
+                                                   de"
 
   }
   views {
-
-    view customer of customer {
+    
+    view usuario of usuario {
       include
         *,
-        customer -> siapi.*, controleacesso.*, webApplication.frontendUser
+        usuario -> siapi.*, controleacesso.*, aplicacaoWeb.frontendUser
       exclude  
         siapiconsole, 
         basePB,
         ca,
         servicos
 
-        style siapi, controleacesso, webApplication {
+        style siapi, controleacesso, aplicacaoWeb {
           color muted
         }
 
@@ -356,9 +389,9 @@ specification {
         }
     }
 
-    view  siapi of siapi {
+    view  topologiasiapi of siapi {
       include 
-        customer ,
+        usuario ,
         servidor,
         frontend,
         backend,
@@ -383,7 +416,7 @@ specification {
 
     view controleacesso of controleacesso {
       include
-        customer,
+        usuario,
         gpas,
         ca,
         basePB,
@@ -410,10 +443,10 @@ specification {
       }
     }
   
-    view  modulos of webApplication {
+    view  modulos of aplicacaoWeb {
       include
         *,
-        customer,
+        usuario,
         servicos,
         buscarelatorio,
         protecao,
@@ -421,12 +454,12 @@ specification {
         tranferenciatecnologia,
         monitoramento
 
-      style webApplication {
+      style aplicacaoWeb {
         color muted
         shape browser
       }
   
-      style customer {
+      style usuario {
         color amber
       }
 
@@ -437,9 +470,7 @@ specification {
       include
         *,
         frontendUser,
-        customer,
-        servicos,
-        customer,
+        usuario,
         servicos,
         buscarelatorio,
         protecao,
@@ -453,13 +484,8 @@ specification {
     view ext of sistemaexterno {
       include
         *,
-        customer,
         bd,
         siapi
-  
-      style * {
-        color muted
-      }
   
       style sistemaexterno, siapi {
         color primary
@@ -474,10 +500,10 @@ specification {
       }
     }
 
-    view webapp of webApplication {
+    view webapp of aplicacaoWeb {
       include
         *
-      style webApplication {
+      style aplicacaoWeb {
         color muted
       }
       
